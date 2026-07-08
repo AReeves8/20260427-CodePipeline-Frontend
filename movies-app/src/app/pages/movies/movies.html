@@ -1,0 +1,150 @@
+
+
+<div class="card">
+    <p-dataview #dv [value]="allMovies()" [layout]="'grid'">
+
+        <!--
+            TEMPLATE REFERENCE VARIABLES
+                - variables that contain a reference to some HTML element
+                - gives access to underlying HTML
+        -->
+        <ng-template #header>
+            <div class="flex justify-between">
+                <div class="pl-5">
+                    <p class="text-5xl">All Movies</p>
+                </div>
+                <div class="pr-5">
+                    <p-button (onClick)="handleCreateMovie()" label="New Movie" />
+                </div>
+            </div>
+        </ng-template>
+        <ng-template #grid let-items>
+            <div class="grid lg:grid-cols-4 sm:grid-cols-2 gap-4 p-4">
+                @for (movie of allMovies(); track $index) {
+                    <div class="movie-card p-6 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded">
+                        <div class="flex flex-col justify-between h-40">
+                            <div class="flex flex-row justify-between products-start gap-2">
+                                <div>
+                                    <div class="text-lg font-medium mt-1">{{ movie.title }}</div>
+                                    <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{movie.director | directorName: "last-first" }}</span>
+                                </div>
+                                <div class="bg-surface-100 p-1" style="border-radius: 30px; height:100%">
+                                    <div class="bg-surface-0 flex products-center gap-2 justify-center py-1 px-2" style="border-radius: 30px; box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.04), 0px 1px 2px 0px rgba(0, 0, 0, 0.06)">
+                                        <span class="text-surface-900 font-medium text-lg text-yellow-500">{{ movie.rating | ratingStars }}</span>
+                                        <!-- <i class="pi pi-star-fill text-yellow-500"></i> -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-6 mt-6">
+                                <div class="flex justify-between gap-2">
+                                    <!-- Update Button -->
+                                    <button 
+                                        pButton 
+                                        icon="pi pi-pen-to-square" 
+                                        class="flex-auto whitespace-nowrap" 
+                                        (click)="handleUpdateMovie(movie)"
+                                    ></button>
+
+                                    <!-- Delete Button -->
+                                    <button 
+                                        pButton 
+                                        icon="pi pi-trash" 
+                                        outlined 
+                                        class="flex-auto whitespace-nowrap"
+                                        (click)="handleDeleteMovie(movie)"
+                                    ></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                @empty {
+                    <p class="text-3xl">No Movies at this time.</p>
+                }
+            </div>
+        </ng-template>
+    </p-dataview>
+</div>
+
+
+<p-dialog
+    [header]="dialogTitle()"
+    [modal]="true"
+    [visible]="showDialog()"
+    [style]="{width: '40rem', height: '40rem'}"
+>
+    <form
+        [formGroup]="form"
+        (ngSubmit)="saveMovie()"
+    >
+
+        <div class="flex flex-row">
+            <!-- TITLE -->
+            <p-ifta-label class="w-full p-2">
+                <input pInputText id="movie-title" type="text" formControlName="title" class="w-full"/>
+                <label for="movie-title" >Title</label>
+            </p-ifta-label>
+            
+            <!-- Director -->
+            <p-ifta-label class="w-full p-2">
+                <p-select 
+                    id="movie-director"
+                    formControlName="director"
+                    [options]="allDirectors()"
+                    class="w-full"
+                >
+                    <!-- Tell PrimeNG how I want each item to look in the dropdown menu -->
+                    <ng-template #item let-director>{{director.firstName}} {{director.lastName}}</ng-template>
+                    <ng-template #selectedItem let-director>{{director.firstName}} {{director.lastName}}</ng-template>
+                </p-select>
+                <label for="movie-director">Director</label>
+            </p-ifta-label>
+        </div>
+        
+        <div class="flex flex-row">
+            <!-- Rating -->
+            <p-ifta-label class="w-full p-2">
+                <p-input-number id="movie-rating" type="number" formControlName="rating" class="w-full"/>
+                <label for="movie-rating">Rating (1-10)</label>
+            </p-ifta-label>
+
+            <!-- Genre -->
+            <p-ifta-label class="w-full p-2">
+                <p-select 
+                    id="movie-genre"
+                    formControlName="genre"
+                    [options]="genreOptions"
+                    class="w-full"
+                />
+                <label for="movie-genre">Genre</label>
+            </p-ifta-label>
+        </div>
+        
+        <!-- Cancel Button -->
+        <p-button 
+            label="Cancel" 
+            type="button" 
+            severity="secondary" 
+            [outlined]="true"  
+            (onClick)="showDialog.set(false)"
+            class="p-2 w-full"
+        />
+
+        <!-- Submit Button - will be disabled if the FormGroup validators are not correct -->
+        <p-button 
+            label="Save" 
+            type="submit"   
+            [disabled]="form.invalid"   
+            class="p-2 w-full"
+        />
+
+    </form>
+</p-dialog>
+
+
+<app-delete-confirmation-modal 
+    [visible]="showDeleteDialog()"
+    [recordName]="selectedMovie()?.title ?? ''"
+    (confirmed)="deleteMovie()"
+    (cancelled)="showDeleteDialog.set(false)"
+/>

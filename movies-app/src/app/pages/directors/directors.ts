@@ -1,12 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { DirectorService } from '../../services/DirectorService';
-import { TableLazyLoadEvent, TableModule } from 'primeng/table';
+import { SortIcon, TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { Director } from '../../types/Director';
 import { Button } from "primeng/button";
 
 @Component({
   selector: 'app-directors',
-  imports: [TableModule, Button],
+  imports: [TableModule, Button, SortIcon],
   templateUrl: './directors.html',
   styleUrl: './directors.css',
 })
